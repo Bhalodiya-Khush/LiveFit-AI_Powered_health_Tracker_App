@@ -10,7 +10,11 @@ const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/livefit';
 const JWT_SECRET = process.env.JWT_SECRET || 'livefit-secret-key';
 
-app.use(cors());
+app.use(cors({
+  origin: '*', // Allow all origins for development
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 const userSchema = new mongoose.Schema(
@@ -24,6 +28,20 @@ const userSchema = new mongoose.Schema(
       default: 'local',
     },
     googleId: { type: String, default: null },
+    // Profile Details
+    age: { type: Number },
+    gender: { type: String, enum: ['male', 'female', 'other'] },
+    weight: { type: Number }, // in kg
+    height: { type: Number }, // in cm
+    bmi: { type: Number },
+    bmr: { type: Number },
+    // Daily Goals
+    goals: {
+      stepGoal: { type: Number, default: 10000 },
+      waterGoal: { type: Number, default: 2.5 }, // in liters
+      sleepGoal: { type: Number, default: 480 }, // in minutes (8 hours)
+      calorieGoal: { type: Number, default: 2000 },
+    },
   },
   { timestamps: true }
 );
@@ -74,6 +92,83 @@ const sleepSchema = new mongoose.Schema(
 );
 
 const Sleep = mongoose.model('Sleep', sleepSchema);
+
+const waterSchema = new mongoose.Schema(
+  {
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    amountLiters: { type: Number, required: true, default: 0 },
+    date: {
+      type: String,
+      required: true,
+      default: () => new Date().toISOString().slice(0, 10),
+    },
+    recordedAt: { type: Date, default: Date.now },
+  },
+  { timestamps: true }
+);
+
+const Water = mongoose.model('Water', waterSchema);
+
+const nutritionSchema = new mongoose.Schema(
+  {
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    foodName: { type: String, required: true },
+    calories: { type: Number, required: true },
+    protein: { type: Number, default: 0 },
+    carbs: { type: Number, default: 0 },
+    fat: { type: Number, default: 0 },
+    mealType: {
+      type: String,
+      enum: ['breakfast', 'lunch', 'dinner', 'snack'],
+      default: 'snack',
+    },
+    date: {
+      type: String,
+      required: true,
+      default: () => new Date().toISOString().slice(0, 10),
+    },
+    recordedAt: { type: Date, default: Date.now },
+  },
+  { timestamps: true }
+);
+
+const Nutrition = mongoose.model('Nutrition', nutritionSchema);
+
+const activitySchema = new mongoose.Schema(
+  {
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    activityType: { type: String, required: true }, // e.g., 'Running', 'Yoga'
+    durationMinutes: { type: Number, required: true },
+    caloriesBurned: { type: Number, default: 0 },
+    intensity: { type: String, enum: ['low', 'moderate', 'high'], default: 'moderate' },
+    date: {
+      type: String,
+      required: true,
+      default: () => new Date().toISOString().slice(0, 10),
+    },
+    recordedAt: { type: Date, default: Date.now },
+  },
+  { timestamps: true }
+);
+
+const Activity = mongoose.model('Activity', activitySchema);
+
+const healthScoreSchema = new mongoose.Schema(
+  {
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    score: { type: Number, required: true, min: 0, max: 100 },
+    breakdown: { type: String }, // AI generated reasoning
+    date: {
+      type: String,
+      required: true,
+      default: () => new Date().toISOString().slice(0, 10),
+    },
+    recordedAt: { type: Date, default: Date.now },
+  },
+  { timestamps: true }
+);
+
+const HealthScore = mongoose.model('HealthScore', healthScoreSchema);
 
 const generateToken = (user) =>
   jwt.sign(
@@ -169,6 +264,14 @@ app.post('/api/auth/register', async (req, res) => {
         name: user.name,
         email: user.email,
         authProvider: user.authProvider,
+        goals: user.goals,
+        profile: {
+          age: user.age,
+          gender: user.gender,
+          weight: user.weight,
+          height: user.height,
+          bmi: user.bmi,
+        }
       },
     });
   } catch (error) {
@@ -210,6 +313,14 @@ app.post('/api/auth/login', async (req, res) => {
         name: user.name,
         email: user.email,
         authProvider: user.authProvider,
+        goals: user.goals,
+        profile: {
+          age: user.age,
+          gender: user.gender,
+          weight: user.weight,
+          height: user.height,
+          bmi: user.bmi,
+        }
       },
     });
   } catch (error) {
@@ -253,6 +364,14 @@ app.post('/api/auth/google', async (req, res) => {
         name: user.name,
         email: user.email,
         authProvider: user.authProvider,
+        goals: user.goals,
+        profile: {
+          age: user.age,
+          gender: user.gender,
+          weight: user.weight,
+          height: user.height,
+          bmi: user.bmi,
+        }
       },
     });
   } catch (error) {

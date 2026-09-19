@@ -109,6 +109,7 @@ class _AuthScreenState extends State<AuthScreen> {
     }
 
     final authService = AuthService();
+    print('Attempting login for: $email');
     final result = _isLoginMode
         ? await authService.login(email: email, password: password)
         : await authService.createAccount(
@@ -116,6 +117,8 @@ class _AuthScreenState extends State<AuthScreen> {
             email: email,
             password: password,
           );
+
+    print('Login Result: $result');
 
     if (!mounted) return;
 
@@ -127,7 +130,7 @@ class _AuthScreenState extends State<AuthScreen> {
     _showMessage('Welcome to LiveFit!');
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (_) => DashboardScreen(userName: result['name'] ?? name ?? 'Athlete'),
+        builder: (_) => DashboardScreen(user: result['user'] ?? {'name': name ?? 'Athlete'}),
       ),
     );
   }
@@ -156,7 +159,7 @@ class _AuthScreenState extends State<AuthScreen> {
     _showMessage('Google login successful.');
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (_) => DashboardScreen(userName: result['name'] ?? googleName),
+        builder: (_) => DashboardScreen(user: result['user'] ?? {'name': googleName}),
       ),
     );
   }
@@ -197,7 +200,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   borderRadius: BorderRadius.circular(28),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.orange.withOpacity(0.12),
+                      color: Colors.orange.withValues(alpha: 0.12),
                       blurRadius: 24,
                       offset: const Offset(0, 12),
                     ),
@@ -360,7 +363,7 @@ class _AuthScreenState extends State<AuthScreen> {
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.orange.withOpacity(0.28),
+                color: Colors.orange.withValues(alpha: 0.28),
                 blurRadius: 22,
                 offset: const Offset(0, 12),
               ),
@@ -412,7 +415,9 @@ class _AuthScreenState extends State<AuthScreen> {
 }
 
 class AuthService {
-  static const String baseUrl = 'http://localhost:5000/api';
+  // Use localhost for Web/Desktop/iOS Simulator
+  // Use 10.0.2.2 for Android Emulator
+  static const String baseUrl = 'http://localhost:5000/api'; 
 
   Future<Map<String, dynamic>?> login({
     required String email,
@@ -423,14 +428,16 @@ class AuthService {
         Uri.parse('$baseUrl/auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'password': password}),
-      );
+      ).timeout(const Duration(seconds: 5));
 
       if (response.statusCode != 200) {
+        print('Login failed: ${response.body}');
         return null;
       }
 
       return jsonDecode(response.body);
-    } catch (_) {
+    } catch (e) {
+      print('Connection Error: $e');
       return null;
     }
   }
@@ -445,14 +452,16 @@ class AuthService {
         Uri.parse('$baseUrl/auth/register'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'name': name, 'email': email, 'password': password}),
-      );
+      ).timeout(const Duration(seconds: 5));
 
       if (response.statusCode != 201 && response.statusCode != 200) {
+        print('Registration failed: ${response.body}');
         return null;
       }
 
       return jsonDecode(response.body);
-    } catch (_) {
+    } catch (e) {
+      print('Connection Error: $e');
       return null;
     }
   }
@@ -466,23 +475,25 @@ class AuthService {
         Uri.parse('$baseUrl/auth/google'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'name': name, 'email': email}),
-      );
+      ).timeout(const Duration(seconds: 5));
 
       if (response.statusCode != 200 && response.statusCode != 201) {
+        print('Google login failed: ${response.body}');
         return null;
       }
 
       return jsonDecode(response.body);
-    } catch (_) {
+    } catch (e) {
+      print('Connection Error: $e');
       return null;
     }
   }
 }
 
 class DashboardScreen extends StatefulWidget {
-  final String userName;
+  final Map<String, dynamic> user;
 
-  const DashboardScreen({super.key, required this.userName});
+  const DashboardScreen({super.key, required this.user});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -491,7 +502,8 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   int _steps = 8420;
   int _sleepMinutes = 0;
-  int _sleepGoalMinutes = 420;
+  late int _sleepGoalMinutes;
+  late int _stepGoal;
   String _sleepTime = '00:00';
   String _wakeUpTime = '00:00';
   String _aiInsight = 'Loading your live health insight...';
@@ -500,6 +512,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
+    _stepGoal = widget.user['goals']?['stepGoal'] ?? 10000;
+    _sleepGoalMinutes = widget.user['goals']?['sleepGoal'] ?? 480;
     _loadInsight();
     _loadSleepData();
   }
@@ -537,7 +551,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     setState(() {
       _sleepMinutes = (sleepSummary['sleepMinutes'] as int?) ?? 0;
-      _sleepGoalMinutes = (sleepSummary['sleepGoalMinutes'] as int?) ?? 420;
+      _sleepGoalMinutes = widget.user['goals']?['sleepGoal'] ?? 480;
       _sleepTime = sleepSummary['sleepTime'] as String? ?? '00:00';
       _wakeUpTime = sleepSummary['wakeUpTime'] as String? ?? '00:00';
     });
@@ -560,7 +574,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final progress = (_steps / 10000).clamp(0.0, 1.25);
+    final progress = (_steps / _stepGoal).clamp(0.0, 1.25);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F4F2),
@@ -619,7 +633,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   borderRadius: BorderRadius.circular(28),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
+                      color: Colors.black.withValues(alpha: 0.04),
                       blurRadius: 10,
                       offset: const Offset(0, 8),
                     ),
@@ -723,9 +737,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               color: Colors.white,
                             ),
                           ),
-                          const Text(
-                            '/ 10000',
-                            style: TextStyle(
+                          Text(
+                            '/ $_stepGoal',
+                            style: const TextStyle(
                               fontSize: 18,
                               color: Colors.white70,
                               fontWeight: FontWeight.w600,
@@ -825,7 +839,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               const SizedBox(height: 18),
               Text(
-                'Welcome back, ${widget.userName}',
+                'Welcome back, ${widget.user['name']}',
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
@@ -845,8 +859,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: _MiniMetricCard(
-                      label: 'Heart',
-                      value: '74 bpm',
+                      label: 'Step Goal',
+                      value: '$_stepGoal',
                       accent: const Color(0xFFFB923C),
                     ),
                   ),
@@ -899,7 +913,7 @@ class _StepTrackingScreenState extends State<StepTrackingScreen> {
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.orange.withOpacity(0.08),
+                    color: Colors.orange.withValues(alpha: 0.08),
                     blurRadius: 16,
                     offset: const Offset(0, 8),
                   ),

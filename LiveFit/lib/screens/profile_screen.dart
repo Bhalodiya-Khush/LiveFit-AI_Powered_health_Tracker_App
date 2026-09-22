@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/status_badge.dart';
+import '../services/api_service.dart';
+import '../models/user_model.dart';
 
 class ProfileScreen extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -21,7 +23,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   double _heightCm = 175;
-  double _currentWeightKg = 70;
+  double _currentWeightKg = 68;
   double _targetWeightKg = 68;
   late int _stepGoal;
   late int _sleepGoalMinutes;
@@ -29,8 +31,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _stepGoal = widget.user['goals']?['stepGoal'] ?? 10000;
-    _sleepGoalMinutes = widget.user['goals']?['sleepGoal'] ?? 480;
+    _heightCm = (widget.user['height'] as num?)?.toDouble() ?? 175;
+    _currentWeightKg = (widget.user['weight'] as num?)?.toDouble() ?? 68;
+    _targetWeightKg = _currentWeightKg;
+    _stepGoal = (widget.user['goals']?['stepGoal'] as num?)?.toInt() ?? 10000;
+    _sleepGoalMinutes = (widget.user['goals']?['sleepGoal'] as num?)?.toInt() ?? 480;
   }
 
   double get _bmi {
@@ -93,13 +98,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
+              final newHeight = double.tryParse(heightController.text) ?? _heightCm;
+              final newWeight = double.tryParse(weightController.text) ?? _currentWeightKg;
+              final newTarget = double.tryParse(targetWeightController.text) ?? _targetWeightKg;
               setState(() {
-                _heightCm = double.tryParse(heightController.text) ?? _heightCm;
-                _currentWeightKg = double.tryParse(weightController.text) ?? _currentWeightKg;
-                _targetWeightKg = double.tryParse(targetWeightController.text) ?? _targetWeightKg;
+                _heightCm = newHeight;
+                _currentWeightKg = newWeight;
+                _targetWeightKg = newTarget;
               });
-              Navigator.of(ctx).pop();
+              await ApiService().updateProfile(height: newHeight, weight: newWeight);
+              if (ctx.mounted) Navigator.of(ctx).pop();
             },
             style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFF97316), foregroundColor: Colors.white),
             child: const Text('Save Changes'),
@@ -140,7 +149,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               final newStep = int.tryParse(stepController.text) ?? _stepGoal;
               final newSleep = (int.tryParse(sleepController.text) ?? 8) * 60;
               setState(() {
@@ -148,7 +157,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _sleepGoalMinutes = newSleep;
               });
               widget.onGoalsUpdated?.call(newStep, newSleep);
-              Navigator.of(ctx).pop();
+              await ApiService().updateProfile(
+                goals: UserGoals(stepGoal: newStep, sleepGoal: newSleep),
+              );
+              if (ctx.mounted) Navigator.of(ctx).pop();
             },
             style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFF97316), foregroundColor: Colors.white),
             child: const Text('Apply Goals'),

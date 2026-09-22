@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:livefit/main.dart';
+import 'package:livefit/screens/step_tracking_screen.dart';
+import 'package:livefit/screens/sleep_tracking_screen.dart';
 import 'package:livefit/services/sleep_service.dart';
 import 'package:livefit/services/step_sensor_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';

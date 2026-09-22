@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:livefit/main.dart';
+import 'package:livefit/screens/dashboard_screen.dart';
+import 'package:livefit/screens/ai_coach_chat_screen.dart';
 import 'package:livefit/services/gemini_service.dart';
 
 void main() {

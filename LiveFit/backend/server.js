@@ -329,57 +329,6 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-app.post('/api/auth/google', async (req, res) => {
-  try {
-    if (!isMongoReady()) {
-      return res.status(503).json({
-        message: 'MongoDB connection is unavailable. Start MongoDB before using Google login.',
-      });
-    }
-
-    const { name, email } = req.body;
-
-    if (!email) {
-      return res.status(400).json({ message: 'Email is required for Google login.' });
-    }
-
-    let user = await User.findOne({ email: email.toLowerCase() });
-
-    if (!user) {
-      user = await User.create({
-        name: name || 'Google User',
-        email: email.toLowerCase(),
-        password: null,
-        authProvider: 'google',
-        googleId: `google_${Date.now()}`,
-      });
-    }
-
-    const token = generateToken(user);
-
-    return res.status(200).json({
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        authProvider: user.authProvider,
-        goals: user.goals,
-        profile: {
-          age: user.age,
-          gender: user.gender,
-          weight: user.weight,
-          height: user.height,
-          bmi: user.bmi,
-        }
-      },
-    });
-  } catch (error) {
-    console.error('Google auth error:', error.message);
-    return res.status(500).json({ message: 'Google login failed.' });
-  }
-});
-
 app.post('/api/steps/sync', authMiddleware, async (req, res) => {
   try {
     const { steps, source = 'sensor' } = req.body;

@@ -1,169 +1,173 @@
 # LiveFit - AI Powered Health Tracker App 🏃‍♂️🥗⚡
 
-**LiveFit** is an AI-powered, holistic health and fitness mobile & web application built using **Flutter & Dart**, backed by a high-performance **Node.js, Express & MongoDB** backend.
+[![Download APK](https://img.shields.io/badge/Download_APK-v1.0.0-FF6B00?style=for-the-badge&logo=android&logoColor=white)](https://github.com/Bhalodiya-Khush/LiveFit-AI_Powered_health_Tracker_App/releases/download/v1.0.0/app-release.apk)
+[![Backend Status](https://img.shields.io/badge/Backend-Live_on_Render-28A745?style=for-the-badge&logo=render&logoColor=white)](https://livefit-ai-powered-health-tracker-app.onrender.com)
+[![Database](https://img.shields.io/badge/Database-MongoDB_Atlas-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/atlas)
+[![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
+[![Gemini AI](https://img.shields.io/badge/Google_Gemini-Vision_%26_LLM-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://aistudio.google.com)
 
-Designed with an energetic **White and Orange aesthetic** (electric tangerine, warm amber, sunset gradient, and crisp white glassmorphic cards), LiveFit integrates state-of-the-art AI and sensor technologies to provide personal fitness guidance.
+**LiveFit** is a full-stack, AI-powered health and fitness mobile application built with **Flutter & Dart**, backed by a production-ready **Node.js, Express & MongoDB Atlas** cloud API deployed on **Render**.
+
+Designed with an energetic **White and Orange aesthetic** (electric tangerine, warm amber, and crisp glassmorphic cards), LiveFit seamlessly integrates hardware pedometer streams, device sleep analysis, Gemini Vision meal scanning, and real-time weather-adapted exercise recommendations.
 
 ---
 
-## 🌟 Key Features & Implementation Highlights
+## 📲 Download & Install the Android App
 
-### 1. 🎨 Curated White & Orange Design Theme
-* **Color Palette**: Electric Orange (`#FF6B00`), Sunset Tangerine (`#FF8533`), Deep Amber (`#E65100`), Soft Peach Cream (`#FFF4EC`), and Pure Surface White (`#FFFFFF`).
-* **Modern Typography**: Google Fonts **Outfit** for bold, dynamic headings and **Inter** for clean, legible body metrics.
-* **Micro-interactions & Cards**: Soft orange-tinted shadows, progress rings, pill badges, and animated transitions.
+You can install and run the production app directly on your Android phone without needing any development tools or USB cables:
 
-### 2. 🔐 JWT Authentication & Dynamic Age Calculation
-* **Login**: Secure email and password authentication with JSON Web Tokens (JWT).
-* **Registration**: Requires Name, Email, Password, Birthdate picker, Gender, Height (cm), Weight (kg), and Health Hurdles (e.g., *Knee Pain*).
-* **Dynamic Age Calculation**: Backend and frontend dynamically compute user age from `birthDate` (`new Date().getFullYear() - birthDate.getFullYear()`).
-* **Profile Management**: Profile page with BMI calculator, healthy weight category indicator, and condition hurdle manager.
+### 📥 Direct Download Links:
+* **[Download LiveFit Release APK (v1.0.0)](https://github.com/Bhalodiya-Khush/LiveFit-AI_Powered_health_Tracker_App/releases/download/v1.0.0/app-release.apk)**
+* **[View GitHub Release Page](https://github.com/Bhalodiya-Khush/LiveFit-AI_Powered_health_Tracker_App/releases/tag/v1.0.0)**
 
-### 3. 👟 Pedometer Step Tracking & 💤 Device Activity Sleep Estimation
-* **Pedometer (`pedometer` package)**: Phone accelerometer sensor stream counts live steps, updates progress towards 10,000 steps, and automatically syncs to MongoDB `DailyLog`.
-* **Sleep Estimation (`usage_stats` package)**: Analyzes device screen inactivity windows during the night (10 PM to 8 AM) to calculate estimated sleep duration, displayed on the dashboard and stored in DB.
-* **Simulator Tools**: Built-in simulator controls (+500 / +1,500 steps and sleep slider) for instant evaluation on emulators and desktop platforms.
+### 📱 Installation Steps:
+1. Tap the **Download APK** link above on your Android phone (or download on PC and transfer to phone's **Download** folder via USB).
+2. Open **Files** / **My Files** on your phone → Tap **Downloads** (or **Installation files**).
+3. Tap **`app-release.apk`** and tap **Install** *(if prompted, allow installation from this source)*.
+4. Open **LiveFit**, create an account or sign in, and you're ready to go!
 
-### 4. 📸 AI Meal & Calorie Scanner (Gemini Vision + OpenFoodFacts)
-* User snaps or uploads a meal photo for **Breakfast**, **Lunch**, **Snack**, or **Dinner**.
-* Backend sends the meal image to **Gemini LLM Vision (`gemini-1.5-flash`)** to recognize all food items and estimate portion weights in grams.
-* Each food item is cross-referenced with **OpenFoodFacts** (`openfoodfacts` API) and nutritional databases to extract exact Calories, Protein, Carbohydrates, and Fats.
-* Aggregates total calories, logs to MongoDB `Meal` collection, and updates Today's Calories Consumed on the dashboard.
+---
 
-### 5. 🏋️‍♂️ PA Compendium MET Workouts & ExerciseDB GIF Demos
-* **PA Compendium Data (`https://pacompendium.com/`)**: Pre-seeded database of Metabolic Equivalent of Task (MET) values for exercises (Squats, Push-ups, Glute Bridges, Mountain Climbers, Jumping Jacks, Brisk Walking, etc.).
-* **Calorie Burn Formula**:
+## 🌐 Live Cloud Architecture
+
+The mobile application is pre-configured to connect directly to the live cloud backend over secure HTTPS:
+
+* **Production Backend API**: [`https://livefit-ai-powered-health-tracker-app.onrender.com`](https://livefit-ai-powered-health-tracker-app.onrender.com)
+* **Cloud Database**: MongoDB Atlas Global Shared Cluster (Active & Whitelisted)
+* **AI Engine**: Google Gemini 1.5 Flash Vision & LLM
+* **Weather API**: Open-Meteo Live Geocoded Forecast
+
+---
+
+## 🌟 Core Features & Implementation Highlights
+
+### 1. 👟 Real-Time Pedometer & Daily Reset Engine
+* **Hardware Step Stream**: Listens to device accelerometer/pedometer hardware events (`pedometer` package).
+* **0 / -1 Sensor Calibration**: Gracefully filters uncalibrated or idle sensor values so step counts never display erratic jumps.
+* **Daily Baseline Subtraction**: Accurately calculates today's steps by subtracting the starting baseline from the cumulative hardware reading:
+  $$\text{Today Steps} = \text{Current Hardware Reading} - \text{Baseline at Start of Day}$$
+* **Automatic 23:59 Midnight Reset**: A background cron scheduler on the server automatically finalizes each day's step counts at 11:59 PM so every day begins at 0 steps.
+* **View-Only Dashboard Cards**: The four primary metrics (**Steps**, **Sleep**, **Food Intake**, and **Calories Burned**) are presented as clean, read-only metric displays.
+
+### 2. 💤 Smart Sleep Detection (Screen Activity Analysis)
+* **Phone Usage Analysis (`usage_stats`)**: Evaluates nightly device activity between 10:00 PM and 8:00 AM.
+* **2-Minute Glance Filter**: Screen interactions under 2 minutes (checking time or glancing at notifications) are filtered out and treated as rest rather than waking up.
+* **Morning Wake-up Marker**: Continuous phone usage in the morning marks the true wake-up time.
+
+### 3. 📸 AI Smart Meal Scanner (Gemini Vision + OpenFoodFacts)
+* **Time-Sliced Automatic Focus**: Automatically focuses on the appropriate meal slice based on the current time of day while allowing instant manual tab switching:
+  * **05:00 – 11:30**: 🥞 Breakfast
+  * **11:30 – 16:00**: 🥗 Lunch
+  * **16:00 – 19:00**: ☕ Snack
+  * **19:00 – 05:00**: 🍲 Dinner
+* **Gemini AI Vision**: Analyzes plate photos, detects individual food items, and estimates portion weights in grams.
+* **OpenFoodFacts Integration**: Matches items with open nutritional databases to extract exact Calories, Protein, Carbohydrates, and Fats.
+
+### 4. 🏋️ Weather & Hurdle-Adapted 5 AI Workouts
+* **PA Compendium MET Formulas**: Uses Metabolic Equivalent of Task (MET) ratings to calculate exact calories burned:
   $$\text{Calories Burned} = \text{MET} \times \text{Weight (kg)} \times \left(\frac{\text{Duration in minutes}}{60}\right)$$
-* **Weather-Aware 5 Suggested Exercises**: Uses `geolocator` coordinates and **Open-Meteo** (`https://open-meteo.com/`) to retrieve current local weather and temperature. A tailored prompt gives user age, height, weight, weather, and health hurdles to Gemini, which generates 5 customized exercises.
-* **Knee-Pain & Hurdle Adaptation**: If the user has a hurdle like *knee pain*, Gemini automatically prioritizes knee-friendly movements (glute bridges, bird dogs, wall sits, pushups) without high-impact compressive shear.
-* **ExerciseDB Animated GIFs (`https://oss.exercisedb.dev/`)**: Each exercise card and modal features an animated GIF demonstration so users can verify proper form.
-* **Mark as Done**: Calculates burned calories, updates MongoDB, and reflects on the dashboard in real-time.
+* **Weather & Location Adaptation**: Automatically fetches local temperature and weather conditions via `geolocator` and **Open-Meteo**.
+* **Health Hurdle Personalization**: If a user specifies health hurdles (e.g. *lower back stiffness* or *knee pain*), the AI dynamically selects safe, low-impact routines.
+* **ExerciseDB Animated GIFs**: Every exercise includes an animated GIF demonstration and step-by-step instructions.
 
-### 6. 🤖 Direct AI Health Coach Chat (Gemini LLM)
-* Floating and header buttons provide one-tap access to the dedicated **AI Chat Screen**.
-* Stores conversation in MongoDB and prompts Gemini:
-  > *"You are LiveFit AI Health Coach. Give a summarized 3-4 line answer to the user's question, keeping in mind user context: age, height, weight, today's steps, weather, and health hurdles (e.g., knee pain)."*
-* Quick chips for common queries: *"How am I doing today?"*, *"My knee is hurting today"*, *"Pre-workout snack"*, *"Sleep tips"*.
+### 5. 🤖 Direct AI Health Coach Chat
+* Dedicated AI chat powered by Gemini LLM.
+* Context-aware responses that account for user age, weight, today's steps, weather, and health conditions.
+* Quick suggestion chips for common fitness, nutrition, and recovery questions.
 
-### 7. 📊 Weekly Analytics & Graphs (`fl_chart`)
-* Dedicated analytics page visualizing the past 7 days:
-  * **Daily Steps Bar Chart**: Steps per day vs. 10,000 steps goal.
-  * **Dual-Bar Calorie Balance**: Food Intake Calories (Orange) vs. Calories Burned (Red).
-  * **Sleep Hours Trend Line**: Inactivity sleep hours over the week.
-  * **Health Score (0–100)**: Dynamic composite rating based on steps, sleep, and workouts.
+### 6. 📊 7-Day Analytics & Health Reports (`fl_chart`)
+* **Weekly Steps Bar Chart**: Visualizes daily steps vs. daily step goal.
+* **Calorie Balance**: Compares food intake (orange) against calories burned (red).
+* **Sleep Duration**: Tracks nightly rest trends across the week.
+* **Composite Health Score**: Generates a dynamic 0–100 health score.
 
 ---
 
-## 🏗️ Project Architecture
+## 🏗️ Project Structure
 
 ```
 LiveFit/
-├── backend/                        # Node.js + Express + MongoDB REST API
-│   ├── .env                        # Environment variables (PORT, MONGO_URI, JWT_SECRET, GEMINI_API_KEY)
-│   ├── server.js                   # Express server entry point & MongoDB connection
+├── backend/                        # Node.js + Express REST API (Deployed on Render)
+│   ├── .env.example                # Safe environment variable template
+│   ├── server.js                   # Server entry point & MongoDB Atlas connection
 │   ├── models/
-│   │   ├── User.js                 # User schema (birthDate, calculated age, hurdles)
-│   │   ├── DailyLog.js             # Steps, sleep, calories consumed & burned
-│   │   ├── Meal.js                 # Food items, quantities, OpenFoodFacts macros
-│   │   ├── Exercise.js             # Exercises, MET, duration, calories burned, GIF URLs
-│   │   ├── Compendium.js           # PA Compendium entries with MET values
-│   │   └── ChatMessage.js          # AI health chat message history
+│   │   ├── User.js                 # User profile, calculated age, health hurdles
+│   │   ├── DailyLog.js             # Daily steps, sleep, calories consumed & burned
+│   │   ├── Meal.js                 # Food items, grams, macro breakdown
+│   │   ├── Exercise.js             # Exercise records, MET calories, completion status
+│   │   ├── Compendium.js           # PA Compendium exercise catalog with demo GIFs
+│   │   └── ChatMessage.js          # User chat history
 │   ├── routes/
-│   │   ├── authRoutes.js           # /api/auth (register, login, profile)
-│   │   ├── dailyStatsRoutes.js     # /api/stats (today, steps, sleep)
-│   │   ├── mealRoutes.js           # /api/meals (analyze photo, today meals)
-│   │   ├── exerciseRoutes.js       # /api/exercises (suggested, mark-done, compendium)
+│   │   ├── authRoutes.js           # /api/auth (register, login, profile, goals)
+│   │   ├── dailyStatsRoutes.js     # /api/stats (today stats, steps, sleep)
+│   │   ├── mealRoutes.js           # /api/meals (analyze, today meals, time slices)
+│   │   ├── exerciseRoutes.js       # /api/exercises (suggested, mark-done, demos)
 │   │   ├── chatRoutes.js           # /api/chat (message, history)
-│   │   └── reportRoutes.js         # /api/reports (weekly 7-day analytics)
+│   │   └── reportRoutes.js         # /api/reports (weekly analytics)
 │   └── services/
-│       ├── geminiService.js        # Gemini Vision analysis, 5-exercise routine, 3-4 line chat
-│       ├── nutritionService.js     # OpenFoodFacts API query & USDA fallback database
-│       ├── weatherService.js       # Open-Meteo forecast integration
-│       └── compendiumData.js       # PA Compendium seed dataset with ExerciseDB GIFs
+│       ├── geminiService.js        # Gemini Vision analysis & workout generator
+│       ├── nutritionService.js     # OpenFoodFacts API query
+│       ├── weatherService.js       # Open-Meteo forecast service
+│       ├── schedulerService.js     # 23:59 daily midnight reset scheduler
+│       └── compendiumData.js       # 20 standard fitness exercises with ExerciseDB GIFs
 │
-└── frontend/                       # Flutter Application (Android, iOS, Web, Windows)
-    ├── pubspec.yaml                # pedometer, usage_stats, geolocator, fl_chart, google_fonts, etc.
+└── frontend/                       # Flutter Cross-Platform Application
+    ├── pubspec.yaml                # Dependencies (pedometer, fl_chart, google_fonts, etc.)
     └── lib/
         ├── main.dart               # MultiProvider setup & theme routing
-        ├── constants/
-        │   └── theme.dart          # White & Orange design system and color palette
+        ├── constants/theme.dart    # White & Orange design system
         ├── services/
-        │   ├── api_service.dart    # HTTP client with JWT handling
-        │   └── sensor_service.dart # Pedometer stream, Geolocator, usage_stats sleep
+        │   ├── api_service.dart    # Cloud API client with automatic token handling
+        │   └── sensor_service.dart # Pedometer sensor stream & usage_stats sleep
         ├── providers/
-        │   ├── auth_provider.dart  # Authentication & user state
-        │   └── health_provider.dart# Steps, sleep, nutrition, exercises, weather, chat
-        ├── widgets/
-        │   ├── weather_card.dart   # Open-Meteo weather display card
-        │   ├── exercise_gif_dialog.dart # ExerciseDB GIF demo modal
-        │   └── stat_progress_card.dart  # Metric card
-        └── screens/
-            ├── auth/
-            │   ├── login_screen.dart    # JWT login
-            │   └── register_screen.dart # Birthdate picker, age calc, hurdles
-            ├── main_navigation_screen.dart # Floating bottom navigation & AI fab
-            ├── dashboard/
-            │   └── dashboard_screen.dart # Central health dashboard
-            ├── meals/
-            │   └── meal_tracker_screen.dart # Gemini Vision + OpenFoodFacts scanner
-            ├── exercises/
-            │   └── exercise_screen.dart  # 5 suggested workouts & MET burn tracker
-            ├── chat/
-            │   └── ai_chat_screen.dart   # Direct Gemini health coach chat
-            ├── reports/
-            │   └── weekly_report_screen.dart # fl_chart 7-day trends & health score
-            └── profile/
-                └── profile_screen.dart   # Calculated age, BMI, hurdles manager
+        │   ├── auth_provider.dart  # Authentication & user profile state
+        │   └── health_provider.dart# Step sync, meals, workouts, chat state
+        ├── screens/
+        │   ├── auth/               # Login & Registration screens
+        │   ├── dashboard/          # Central dashboard with read-only metric cards
+        │   ├── meals/              # Time-sliced AI meal photo scanner
+        │   ├── exercises/          # 5 suggested workouts with demo GIF dialogs
+        │   ├── chat/               # Dedicated Gemini AI Health Coach chat
+        │   ├── reports/            # Weekly 7-day analytics & trend charts
+        │   └── profile/            # Profile settings, goals, hurdle editor
+        └── widgets/                # Reusable weather cards, dialogs, progress bars
 ```
 
 ---
 
-## 🚀 Running the Application
+## 🛠️ Local Development Setup
 
-### Step 1: Start MongoDB
-MongoDB Server is already installed on your system. To ensure it is running:
-```powershell
-net start MongoDB
-```
+If you want to run the project locally on your machine:
 
-### Step 2: Run the Backend
+### 1. Prerequisites:
+* Flutter SDK (3.x or higher)
+* Node.js (v18 or higher)
+* Android Studio / VS Code
+
+### 2. Backend Setup:
 ```powershell
-cd "d:\B.Tech\SEM5\New folder SDP project\LiveFit\backend"
+cd backend
 npm install
 node server.js
 ```
-The backend starts on `http://localhost:5050` and automatically connects to MongoDB `livefit_db` and seeds the PA Compendium exercises.
+*(Copy `backend/.env.example` to `backend/.env` and add your MongoDB URI and Gemini API key).*
 
-> **Optional**: Set your Gemini API key in `LiveFit/backend/.env`:
-> ```env
-> GEMINI_API_KEY=your_gemini_api_key_here
-> ```
-> *Note: If no key is set, the server includes a calibrated fallback engine for vision, workouts, and chat so the app runs smoothly in offline/demo environments.*
-
-### Step 3: Run the Flutter App
+### 3. Flutter Frontend Setup:
 ```powershell
-cd "d:\B.Tech\SEM5\New folder SDP project\LiveFit\frontend"
+cd frontend
 flutter pub get
-```
-
-#### Run on Chrome / Web:
-```powershell
-flutter run -d chrome
-```
-
-#### Run on Windows Desktop:
-```powershell
-flutter run -d windows
-```
-
-#### Run on Connected Android Device / Emulator:
-```powershell
-flutter run -d android
+flutter run
 ```
 
 ---
 
-## 🧪 Quick Test Credentials
-* **Email**: `alex@example.com`
-* **Password**: `password123`
-* *Or tap "Create Account" on the login screen to register a new user with custom birthdate and health hurdles!*
+## 🔒 Security & Privacy Audit
+* **Dependency Health**: `npm audit` returned **0 vulnerabilities**.
+* **Password Encryption**: Salted `bcrypt` one-way hashing for all user passwords.
+* **Secret Protection**: All Gemini API keys and database credentials reside exclusively in cloud environment variables, completely isolated from client APK code.
+* **Transport Encryption**: All client-server traffic is encrypted using TLS/HTTPS.
+
+---
+
+## 👨‍💻 Authors & Academic Project
+Developed by **Khush Bhalodiya** as part of the B.Tech Semester 5 Software Development Project (SDP).

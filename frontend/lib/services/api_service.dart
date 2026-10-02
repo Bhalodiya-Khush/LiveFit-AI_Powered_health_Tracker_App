@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -9,11 +8,9 @@ class ApiService {
   factory ApiService() => _instance;
   ApiService._internal();
 
-  // Configured for wired USB debugging (via adb reverse tcp:5050 tcp:5050) & local development
+  // Production Live Backend hosted on Render with free SSL/HTTPS
   static String get defaultBaseUrl {
-    // 127.0.0.1 routes seamlessly to host PC via adb reverse during wired debug,
-    // and works out of the box for Chrome / Web debugging.
-    return 'http://127.0.0.1:5050/api';
+    return 'https://livefit-ai-powered-health-tracker-app.onrender.com/api';
   }
 
   String _baseUrl = defaultBaseUrl;
@@ -50,11 +47,12 @@ class ApiService {
     _token = prefs.getString('livefit_jwt_token');
     final savedUrl = prefs.getString('livefit_base_url');
     if (savedUrl != null && savedUrl.isNotEmpty) {
-      // Invalidate stale Wi-Fi IPs or emulator URLs so wired debug works seamlessly
+      // Invalidate stale local or debug IPs so app connects to production Render URL
       if (savedUrl.contains('172.21.33.224') ||
           savedUrl.contains('10.0.2.2') ||
           savedUrl.contains('10.174.140') ||
-          (kIsWeb && !savedUrl.contains('127.0.0.1') && !savedUrl.contains('localhost'))) {
+          savedUrl.contains('127.0.0.1') ||
+          savedUrl.contains('localhost')) {
         _baseUrl = defaultBaseUrl;
         await prefs.setString('livefit_base_url', defaultBaseUrl);
       } else {

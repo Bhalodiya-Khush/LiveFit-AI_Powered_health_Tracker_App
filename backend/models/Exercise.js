@@ -40,6 +40,10 @@ const exerciseSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  estimatedCalories: {
+    type: Number,
+    default: 0,
+  },
   gifUrl: {
     type: String,
     default: '',

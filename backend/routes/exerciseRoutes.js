@@ -155,15 +155,22 @@ router.post('/suggested', protect, async (req, res) => {
             'Rest 45 seconds between sets.',
           ];
 
+      const metVal = item.metValue || (match ? match.met : 5.0);
+      const durMin = item.durationMinutes || (match ? match.durationMinutes : 15);
+      const userWeight = req.user.weight || 70;
+      const estimatedCalories = Math.round(metVal * userWeight * (durMin / 60));
+
       const exerciseDoc = await Exercise.create({
         user: req.user._id,
         date: today,
         exerciseName: item.exerciseName,
         category: item.category || (match ? match.category : 'Conditioning'),
         targetMuscle: item.targetMuscle || (match ? match.targetMuscle : 'Full Body'),
-        metValue: item.metValue || (match ? match.met : 5.0),
-        durationMinutes: item.durationMinutes || (match ? match.durationMinutes : 15),
+        metValue: metVal,
+        durationMinutes: durMin,
         repetitions: item.repetitions || (match ? match.repetitions : '3 sets x 12 reps'),
+        estimatedCalories: estimatedCalories,
+        caloriesBurned: 0,
         gifUrl: gifUrl,
         instructions: instructions,
         reason: item.reason || `Personalized for your ${req.user.age}yr profile in ${weather.condition}`,

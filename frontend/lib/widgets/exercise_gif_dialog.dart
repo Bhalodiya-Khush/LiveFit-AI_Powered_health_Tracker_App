@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../constants/theme.dart';
+import '../providers/auth_provider.dart';
 
 String getWorkingExerciseGif(dynamic rawUrl, String? name) {
   final url = rawUrl?.toString() ?? '';
@@ -66,15 +68,35 @@ class ExerciseGifDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = exercise['exerciseName'] ?? 'Exercise';
+    final name = exercise['exerciseName']?.toString() ?? 'Exercise';
     final gifUrl = getWorkingExerciseGif(exercise['gifUrl'], name);
-    final target = exercise['targetMuscle'] ?? 'Full Body';
-    final met = (exercise['metValue'] as num?)?.toDouble() ?? 5.0;
-    final duration = exercise['durationMinutes'] ?? 15;
-    final calories = exercise['caloriesBurned'] ?? ((met * 70 * (duration / 60)).round());
-    final reps = exercise['repetitions'] ?? '3 sets';
+    final target = exercise['targetMuscle']?.toString() ?? 'Full Body';
+    final met = (exercise['metValue'] as num?)?.toDouble() ?? double.tryParse('${exercise['metValue']}') ?? 5.0;
+    final duration = (exercise['durationMinutes'] as num?)?.toInt() ?? int.tryParse('${exercise['durationMinutes']}') ?? 15;
+    final reps = exercise['repetitions']?.toString() ?? '3 sets';
     final isCompleted = exercise['completed'] == true;
     final instructions = exercise['instructions'] as List<dynamic>? ?? [];
+
+    // Retrieve user weight if available, fallback to 70kg
+    double userWeight = 70.0;
+    try {
+      final auth = Provider.of<AuthProvider>(context, listen: false);
+      if (auth.weight > 0) {
+        userWeight = auth.weight;
+      }
+    } catch (_) {}
+
+    // Parse calories: if already recorded/burned in DB use that, otherwise compute estimate
+    final rawBurned = (exercise['caloriesBurned'] as num?)?.toInt() ?? int.tryParse('${exercise['caloriesBurned']}') ?? 0;
+    final rawEstimated = (exercise['estimatedCalories'] as num?)?.toInt() ?? int.tryParse('${exercise['estimatedCalories']}') ?? 0;
+    final computedEstimate = (met * userWeight * ((duration > 0 ? duration : 15) / 60.0)).round();
+
+    final calories = rawBurned > 0
+        ? rawBurned
+        : (rawEstimated > 0
+            ? rawEstimated
+            : (computedEstimate > 0 ? computedEstimate : 50));
+    final caloriesLabel = (isCompleted && rawBurned > 0) ? '$calories kcal' : '~$calories kcal';
 
     return Dialog(
       backgroundColor: Colors.white,
@@ -194,13 +216,13 @@ class ExerciseGifDialog extends StatelessWidget {
                       children: [
                         _buildBadge(
                           icon: Icons.timer_outlined,
-                          label: '$duration min',
+                          label: '${duration > 0 ? duration : 15} min',
                           color: AppColors.info,
                           bg: const Color(0xFFEFF6FF),
                         ),
                         _buildBadge(
                           icon: Icons.local_fire_department_rounded,
-                          label: '~$calories kcal',
+                          label: caloriesLabel,
                           color: AppColors.caloriesRed,
                           bg: const Color(0xFFFEF2F2),
                         ),

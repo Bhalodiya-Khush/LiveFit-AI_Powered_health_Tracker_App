@@ -67,6 +67,22 @@ mongoose
       console.warn('Exercise demo library sync warning:', seedErr.message);
     }
 
+    // Auto-backfill estimatedCalories for exercises in MongoDB Atlas
+    try {
+      const Exercise = require('./models/Exercise');
+      const unestimated = await Exercise.find({
+        $or: [{ estimatedCalories: 0 }, { estimatedCalories: { $exists: false } }],
+      }).limit(500);
+      for (const ex of unestimated) {
+        const met = ex.metValue || 5.0;
+        const dur = ex.durationMinutes || 15;
+        ex.estimatedCalories = Math.round(met * 70 * (dur / 60));
+        await ex.save();
+      }
+    } catch (mErr) {
+      console.warn('Exercise estimatedCalories backfill warning:', mErr.message);
+    }
+
     // Initialize 23:59 daily midnight steps reset and finalization scheduler
     try {
       initMidnightDailyScheduler();

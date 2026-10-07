@@ -208,7 +208,40 @@ class _WeeklyReportScreenState extends State<WeeklyReportScreen> {
                             BarChartData(
                               alignment: BarChartAlignment.spaceAround,
                               maxY: stepsMaxY,
-                              barTouchData: BarTouchData(enabled: true),
+                              barTouchData: BarTouchData(
+                                enabled: true,
+                                touchTooltipData: BarTouchTooltipData(
+                                  getTooltipColor: (_) => Colors.white,
+                                  tooltipBorderRadius: BorderRadius.circular(10),
+                                  tooltipBorder: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
+                                  tooltipPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  fitInsideHorizontally: true,
+                                  fitInsideVertically: true,
+                                  getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                                    final dayName = (groupIndex >= 0 && groupIndex < weeklyData.length)
+                                        ? (weeklyData[groupIndex]['day'] ?? '')
+                                        : '';
+                                    return BarTooltipItem(
+                                      dayName.isNotEmpty ? '$dayName: ' : '',
+                                      GoogleFonts.inter(
+                                        color: AppColors.textSecondary,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 11,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                          text: '${rod.toY.toInt()} steps',
+                                          style: GoogleFonts.outfit(
+                                            color: AppColors.primary,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                ),
+                              ),
                               titlesData: FlTitlesData(
                                 show: true,
                                 bottomTitles: AxisTitles(
@@ -271,6 +304,40 @@ class _WeeklyReportScreenState extends State<WeeklyReportScreen> {
                             BarChartData(
                               alignment: BarChartAlignment.spaceAround,
                               maxY: calsMaxY,
+                              barTouchData: BarTouchData(
+                                enabled: true,
+                                touchTooltipData: BarTouchTooltipData(
+                                  getTooltipColor: (_) => Colors.white,
+                                  tooltipBorderRadius: BorderRadius.circular(10),
+                                  tooltipBorder: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
+                                  tooltipPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  fitInsideHorizontally: true,
+                                  fitInsideVertically: true,
+                                  getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                                    final isBurned = rodIndex == 1;
+                                    final label = isBurned ? 'Burned' : 'Intake';
+                                    final color = isBurned ? AppColors.caloriesRed : AppColors.primary;
+                                    return BarTooltipItem(
+                                      '$label: ',
+                                      GoogleFonts.inter(
+                                        color: AppColors.textSecondary,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 11,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                          text: '${rod.toY.toInt()} kcal',
+                                          style: GoogleFonts.outfit(
+                                            color: color,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                ),
+                              ),
                               titlesData: FlTitlesData(
                                 show: true,
                                 bottomTitles: AxisTitles(
@@ -334,6 +401,51 @@ class _WeeklyReportScreenState extends State<WeeklyReportScreen> {
                               minX: 0,
                               maxX: (weeklyData.isEmpty ? 6 : weeklyData.length - 1).toDouble(),
                               clipData: const FlClipData.all(),
+                              lineTouchData: LineTouchData(
+                                enabled: true,
+                                handleBuiltInTouches: true,
+                                touchTooltipData: LineTouchTooltipData(
+                                  getTooltipColor: (_) => Colors.white,
+                                  tooltipBorderRadius: BorderRadius.circular(10),
+                                  tooltipBorder: BorderSide(
+                                    color: AppColors.sleepPurple.withValues(alpha: 0.3),
+                                    width: 1,
+                                  ),
+                                  tooltipPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  fitInsideHorizontally: true,
+                                  fitInsideVertically: true,
+                                  getTooltipItems: (touchedSpots) {
+                                    return touchedSpots.map((spot) {
+                                      final i = spot.x.toInt();
+                                      final dayName = (i >= 0 && i < weeklyData.length)
+                                          ? (weeklyData[i]['day'] ?? '')
+                                          : '';
+                                      final hours = spot.y;
+                                      final formattedHours = hours % 1 == 0
+                                          ? '${hours.toInt()}h'
+                                          : '${hours.toStringAsFixed(1)}h';
+                                      return LineTooltipItem(
+                                        dayName.isNotEmpty ? '$dayName: ' : '',
+                                        GoogleFonts.inter(
+                                          color: AppColors.textSecondary,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 12,
+                                        ),
+                                        children: [
+                                          TextSpan(
+                                            text: formattedHours,
+                                            style: GoogleFonts.outfit(
+                                              color: AppColors.sleepPurple,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    }).toList();
+                                  },
+                                ),
+                              ),
                               titlesData: FlTitlesData(
                                 bottomTitles: AxisTitles(
                                   sideTitles: SideTitles(

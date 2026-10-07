@@ -1,6 +1,6 @@
 # LiveFit - AI Powered Health Tracker App 🏃‍♂️🥗⚡
 
-[![Download APK](https://img.shields.io/badge/Download_APK-v1.0.0-FF6B00?style=for-the-badge&logo=android&logoColor=white)](https://github.com/Bhalodiya-Khush/LiveFit-AI_Powered_health_Tracker_App/releases/download/v1.0.0/app-release.apk)
+[![Download APK](https://img.shields.io/badge/Download_APK-v1.0.1-FF6B00?style=for-the-badge&logo=android&logoColor=white)](https://github.com/Bhalodiya-Khush/LiveFit-AI_Powered_health_Tracker_App/releases/download/v1.0.1/app-release.apk)
 [![Backend Status](https://img.shields.io/badge/Backend-Live_on_Render-28A745?style=for-the-badge&logo=render&logoColor=white)](https://livefit-ai-powered-health-tracker-app.onrender.com)
 [![Database](https://img.shields.io/badge/Database-MongoDB_Atlas-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/atlas)
 [![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
@@ -17,8 +17,8 @@ Designed with an energetic **White and Orange aesthetic** (electric tangerine, w
 You can install and run the production app directly on your Android phone without needing any development tools or USB cables:
 
 ### 📥 Direct Download Links:
-* **[Download LiveFit Release APK (v1.0.0)](https://github.com/Bhalodiya-Khush/LiveFit-AI_Powered_health_Tracker_App/releases/download/v1.0.0/app-release.apk)**
-* **[View GitHub Release Page](https://github.com/Bhalodiya-Khush/LiveFit-AI_Powered_health_Tracker_App/releases/tag/v1.0.0)**
+* **[Download LiveFit Release APK (v1.0.1)](https://github.com/Bhalodiya-Khush/LiveFit-AI_Powered_health_Tracker_App/releases/download/v1.0.1/app-release.apk)**
+* **[View GitHub Release Page (v1.0.1)](https://github.com/Bhalodiya-Khush/LiveFit-AI_Powered_health_Tracker_App/releases/tag/v1.0.1)**
 
 ### 📱 Installation Steps:
 1. Tap the **Download APK** link above on your Android phone (or download on PC and transfer to phone's **Download** folder via USB).
